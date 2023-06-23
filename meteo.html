@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="./nuages.jpg"/>
+  <title>Météo by Samy</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url("nuages.jpg");
+      padding: 60px;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10%;
+      border-radius: 8%;
+    }
+
+    .forecast-item {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="mt-4">Météo</h1>
+
+    <form id="searchForm" class="mb-4">
+      <div class="input-group">
+        <input type="text" id="cityInput" class="form-control" placeholder="Entrez le nom de la ville">
+        <button type="submit" class="btn btn-primary">Rechercher</button>
+      </div>
+    </form>
+
+    <div id="weatherInfo"></div>
+    <h4 class="mt-4" style="text-align: center;">Site créé par Samy ZIREM &copy; 2023. Tous les droits sont réservés.</h4>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // Événement de soumission du formulaire
+    document.getElementById('searchForm').addEventListener('submit', function (event) {
+      event.preventDefault(); // Empêche le rechargement de la page
+
+      var city = document.getElementById('cityInput').value;
+      getWeather(city);
+    });
+
+    // Fonction pour obtenir la météo de la ville
+    function getWeather(city) {
+      var apiKey = '6668e2a1d9064359f4b2b077c120c1b8'; // Remplace par ta clé API
+      var apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=' + apiKey;
+
+      // Requête AJAX
+      axios.get(apiUrl)
+        .then(function (response) {
+          var weatherData = response.data;
+          displayWeather(weatherData);
+        })
+        .catch(function (error) {
+          displayError('Erreur lors de la récupération des données météo.');
+        });
+    }
+
+    // Fonction pour afficher les informations météo
+    function displayWeather(data) {
+      var weatherInfo = document.getElementById('weatherInfo');
+      weatherInfo.innerHTML = '';
+
+      var cityName = document.createElement('h2');
+      cityName.textContent = data.name;
+      weatherInfo.appendChild(cityName);
+
+      var temperature = document.createElement('p');
+      temperature.innerHTML = '<strong>Température actuelle: </strong>' + (data.main.temp - 273.15).toFixed(1) + '°C';
+      weatherInfo.appendChild(temperature);
+
+      var maxTemperature = document.createElement('p');
+      maxTemperature.innerHTML = '<strong>Température maximale dans la journée: </strong>' + (data.main.temp_max - 273.15).toFixed(1) + '°C';
+      weatherInfo.appendChild(maxTemperature);
+
+      var minTemperature = document.createElement('p');
+      minTemperature.innerHTML = '<strong>Température minimale dans la journée: </strong>' + (data.main.temp_min - 273.15).toFixed(1) + '°C';
+      weatherInfo.appendChild(minTemperature);
+
+      var description = document.createElement('p');
+      description.innerHTML = '<strong>Description: </strong>' + getWeatherDescription(data.weather[0].id);
+      weatherInfo.appendChild(description);
+    }
+
+    // Fonction pour obtenir la description de la météo en fonction du code de condition
+    function getWeatherDescription(weatherCode) {
+      switch (weatherCode) {
+        case 200:
+        case 201:
+        case 202:
+          return 'Orages avec pluie légère';
+        case 210:
+        case 211:
+        case 212:
+        case 221:
+          return 'Orages';
+        case 230:
+        case 231:
+        case 232:
+          return 'Orages avec pluie';
+        case 300:
+        case 301:
+        case 302:
+        case 310:
+        case 311:
+        case 312:
+        case 313:
+        case 314:
+        case 321:
+          return 'Pluie légère';
+        case 500:
+          return 'Pluie légère';
+        case 501:
+          return 'Pluie modérée';
+        case 502:
+          return 'Pluie intense';
+        case 503:
+          return 'Pluie très intense';
+        case 504:
+          return 'Pluie extrême';
+        case 511:
+          return 'Pluie verglaçante';
+        case 520:
+        case 521:
+        case 522:
+        case 531:
+          return 'Averses de pluie';
+        case 600:
+          return 'Neige légère';
+        case 601:
+          return 'Neige';
+        case 602:
+          return 'Neige intense';
+        case 611:
+        case 612:
+          return 'Neige fondue';
+        case 615:
+        case 616:
+          return 'Averses de pluie et neige';
+        case 620:
+        case 621:
+        case 622:
+          return 'Averses de neige';
+        case 701:
+          return 'Brume';
+        case 711:
+          return 'Fumée';
+        case 721:
+          return 'Brume';
+        case 731:
+          return 'Sable, poussière';
+        case 741:
+          return 'Brouillard';
+        case 751:
+          return 'Sable';
+        case 761:
+          return 'Poussière';
+        case 762:
+          return 'Cendres volcaniques';
+        case 771:
+          return 'Bourrasques';
+        case 781:
+          return 'Tornade';
+        case 800:
+          return 'Ciel dégagé';
+        case 801:
+          return 'Quelques nuages';
+        case 802:
+          return 'Nuages épars';
+        case 803:
+          return 'Nuages fragmentés';
+        case 804:
+          return 'Nuageux';
+        default:
+          return 'Conditions météorologiques inconnues';
+      }
+    }
+
+    // Fonction pour afficher les messages d'erreur
+    function displayError(message) {
+      var weatherInfo = document.getElementById('weatherInfo');
+      weatherInfo.innerHTML = '';
+
+      var error = document.createElement('p');
+      error.textContent = message;
+      weatherInfo.appendChild(error);
+    }
+  </script>
+</body>
+
+</html>
